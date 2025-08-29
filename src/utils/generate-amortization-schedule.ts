@@ -7,6 +7,13 @@ type ScheduleEntry = {
     endingBalance: number;
 };
 
+type AmortizationScheduleResult = {
+    schedule: ScheduleEntry[];
+    totalInterest: number;
+    totalPrincipal: number;
+    totalPayments: number;
+};
+
 export function generateAmortizationSchedule(
     loanAmount: number,
     amortizationMonths: number,
@@ -14,7 +21,7 @@ export function generateAmortizationSchedule(
     marginAbovePrime: number,
     primeInterestRate: number,
     startDate: Date = new Date(),
-) {
+): AmortizationScheduleResult {
     const schedule: ScheduleEntry[] = [];
     const dailyInterestRate =
         (primeInterestRate + marginAbovePrime) / 100 / 360;
@@ -22,9 +29,12 @@ export function generateAmortizationSchedule(
 
     let balance = loanAmount;
 
+    let totalInterest = 0;
+    let totalPrincipal = 0;
+
     for (let month = 1; month <= termMonths; month++) {
         const payDate = new Date(startDate);
-        payDate.setMonth(payDate.getMonth() + month);
+        payDate.setMonth(payDate.getMonth() + (month - 1));
 
         const endOfMonth = new Date(
             payDate.getFullYear(),
@@ -35,11 +45,13 @@ export function generateAmortizationSchedule(
         const daysInMonth = endOfMonth.getDate();
 
         const interestPayment = balance * dailyInterestRate * daysInMonth;
-
         let principalPayment =
             month <= amortizationMonths ? fixedPrincipalPayment : 0;
 
         const endingBalance = balance - principalPayment;
+
+        totalInterest += interestPayment;
+        totalPrincipal += principalPayment;
 
         schedule.push({
             month,
@@ -70,7 +82,16 @@ export function generateAmortizationSchedule(
             principalPayment: parseFloat(balance.toFixed(2)),
             endingBalance: 0,
         });
+
+        totalPrincipal += balance; // add balloon principal
     }
 
-    return schedule;
+    const totalPayments = totalInterest + totalPrincipal;
+
+    return {
+        schedule,
+        totalInterest: parseFloat(totalInterest.toFixed(2)),
+        totalPrincipal: parseFloat(totalPrincipal.toFixed(2)),
+        totalPayments: parseFloat(totalPayments.toFixed(2)),
+    };
 }

@@ -24,7 +24,7 @@ export const getAmortizationSchedule = (req: Request, res: Response) => {
             });
         }
 
-        const schedule = paymentScheduleService.getAmortizationSchedule(
+        const result = paymentScheduleService.getAmortizationSchedule(
             loanAmount as string,
             amortizationMonths as string,
             termMonths as string,
@@ -34,7 +34,7 @@ export const getAmortizationSchedule = (req: Request, res: Response) => {
 
         return res.json({
             success: true,
-            data: { schedule },
+            data: result,
         });
     } catch (error: any) {
         return res.status(500).json({
