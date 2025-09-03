@@ -43,10 +43,12 @@ export function generateAmortizationSchedule(
         );
 
         const daysInMonth = endOfMonth.getDate();
+        console.log(daysInMonth);
 
         const interestPayment = balance * dailyInterestRate * daysInMonth;
-        let principalPayment =
-            month <= amortizationMonths ? fixedPrincipalPayment : 0;
+        // let principalPayment =
+        //     month <= amortizationMonths ? fixedPrincipalPayment : 0; As terms is always less than amortization, we dont have to check the condition.
+        let principalPayment = fixedPrincipalPayment;
 
         const endingBalance = balance - principalPayment;
 
