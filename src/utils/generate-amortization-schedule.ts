@@ -43,11 +43,13 @@ export function generateAmortizationSchedule(
         );
 
         const daysInMonth = endOfMonth.getDate();
-        console.log(daysInMonth);
 
-        const interestPayment = balance * dailyInterestRate * daysInMonth;
-        // let principalPayment =
-        //     month <= amortizationMonths ? fixedPrincipalPayment : 0; As terms is always less than amortization, we dont have to check the condition.
+        let interestPayment = balance * dailyInterestRate * daysInMonth;
+
+        if (month === 1) {
+            balance * dailyInterestRate * (daysInMonth - startDate.getDate());
+        }
+
         let principalPayment = fixedPrincipalPayment;
 
         const endingBalance = balance - principalPayment;
@@ -72,20 +74,23 @@ export function generateAmortizationSchedule(
         lastPaymentDate.setMonth(lastPaymentDate.getMonth() + termMonths);
         const balloonDate = new Date(
             lastPaymentDate.getFullYear(),
-            lastPaymentDate.getMonth() + 1,
-            1,
+            lastPaymentDate.getMonth(),
+            startDate.getDate(),
         );
+
+        const baloonInterestPayment =
+            balance * dailyInterestRate * startDate.getDate();
 
         schedule.push({
             month: termMonths + 1,
             date: balloonDate.toISOString().split('T')[0],
             startingBalance: parseFloat(balance.toFixed(2)),
-            interestPayment: 0,
+            interestPayment: parseFloat(baloonInterestPayment.toFixed(2)),
             principalPayment: parseFloat(balance.toFixed(2)),
             endingBalance: 0,
         });
 
-        totalPrincipal += balance; // add balloon principal
+        totalPrincipal += balance;
     }
 
     const totalPayments = totalInterest + totalPrincipal;
